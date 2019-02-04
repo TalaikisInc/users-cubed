@@ -1,0 +1,24 @@
+export default {
+  CONFIRM: {
+    SEND: 'CONFIRM_SEND'
+  },
+  RESET: {
+    CREATE: 'RESET_CREATE'
+  },
+  USERS: {
+
+  },
+  TOKEN: {
+    CREATE: 'TOKEN_CREATE',
+    EXTEND: 'TOKEN_EXTEND',
+    DESTROY: 'TOKEN_DESTROY'
+    }
+  },
+  REFER: {
+    REFER: 'REFER_REFER',
+    USE: 'REFER_USE',
+    REGISTER: 'REFER_REGISTER'
+  },
+  PING: 'PING',
+  NOT_FOUND: 'NOT_FOUND'
+}
