@@ -41,7 +41,7 @@ npm run start
 
 ```bash
 npm i
-npm run start:debug
+npm run debug
 ```
 
 ## System requirements
@@ -50,6 +50,8 @@ npm run start:debug
 
 ## Routes
 
+There is only one '/' route that accepts only POST requests.
+
 ### Tokens
 
 Login.
@@ -57,9 +59,9 @@ Login.
 ```json
 // POST /tokens
 {
-    "phone": "37061415694",
+    "email": "test@gmail.com",
     "password": "testpassword369",
-    "_action": "post"
+    "action": "TOKEN_CREATE"
 }
 ```
 
@@ -70,7 +72,7 @@ Get token information.
 
 {
     "tokenId": "02a2ba7d-468a-467b-823a-e90b117957f6",
-    "_action": "get"
+    "action": "TOKEN_GET"
 }
 ```
 
@@ -81,8 +83,7 @@ Extend token expiration.
 
 {
     "tokenId": "02a2ba7d-468a-467b-823a-e90b117957f6",
-    "extend": true,
-    "_action": "put"
+    "action": "TOKEN_EXTEND"
 }
 ```
 
@@ -93,9 +94,11 @@ Logout.
 
 {
     "tokenId": "02a2ba7d-468a-467b-823a-e90b117957f6",
-    "_action": "delete"
+    "action": "TOKEN_DESTROY"
 }
 ```
+
+Token autodestroys after time defined in config.
 
 ### Users
 
@@ -110,7 +113,7 @@ Register
     "email": "info@talaikis.com",
     "password": "testpassword369",
     "tosAgreement": true,
-    "_action": "post"
+    "action": "USER_CREATE"
 }
 ```
 
@@ -121,8 +124,8 @@ Get user data.
 // needs auth token
 
 {
-  "phone": "37061415694",
-  "_action": "get"
+  "email": "test@gmail.com",
+  "action": "USER_GET"
 }
 ```
 

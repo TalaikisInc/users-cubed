@@ -64,7 +64,7 @@ export default (data, callback) => {
       } else {
         callback(403, { error: 'Token not found.' })
       }
-    });
+    })
   } else {
     callback(400, { error: 'Not all required fields provided.' })
   }

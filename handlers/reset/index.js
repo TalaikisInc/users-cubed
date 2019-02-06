@@ -4,8 +4,8 @@ import config from '../../config'
 const sendEmailReset = (email, phone, callback) => {
   randomID(32, (code) => {
     if (code) {
-      const subject = 'Please confirm your password reset';
-      const msg = `Click here to confirm password reset: <a href="${config.baseUrl}?token=${code}">${code}</a>`;
+      const subject = 'Please confirm your password reset'
+      const msg = `Click here to confirm password reset: <a href="${config.baseUrl}?token=${code}">${code}</a>`
       const obj = {
         phone,
         type: 'reset',
@@ -41,7 +41,7 @@ const sendPhoneConfirmation = (phone, callback) => {
         type: 'reset',
         token: code,
         expiry: Date.now() + 1000 * 60 * 60
-      };
+      }
 
       dataLib.create('confirms', code, obj, (err) => {
         if (!err) {
@@ -93,9 +93,9 @@ export default (data, callback) => {
           } else {
             callback(500, { error: `Cannot send email: ${err.error}` })
           }
-        });
+        })
       } else {
-        callback(400, { error: 'No such user.' });
+        callback(400, { error: 'No such user.' })
       }
     })
   } else {

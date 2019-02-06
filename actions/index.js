@@ -5,8 +5,10 @@ export default {
   RESET: {
     CREATE: 'RESET_CREATE'
   },
-  USERS: {
-
+  USER: {
+    CREATE: 'USER_CREATE',
+    EDIT: 'USER_EDIT',
+    DESTROY: 'USER_DESTROY'
   },
   TOKEN: {
     CREATE: 'TOKEN_CREATE',

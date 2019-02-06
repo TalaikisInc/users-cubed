@@ -41,7 +41,7 @@ export const refer = (data, callback) => {
   const authToken = tokenHeader(data)
   if (authToken) {
     const uo = userObj(data)
-    const refEmail = typeof data.payload.refEmail === 'string' && data.payload.refEmail.indexOf('@') > -1 ? data.payload.refEmail.trim() : false;
+    const refEmail = typeof data.payload.refEmail === 'string' && data.payload.refEmail.indexOf('@') > -1 ? data.payload.refEmail.trim() : false
     if (uo.phone && refEmail) {
       dataLib.read('users', uo.phone, (err, userData) => {
         if (!err && data) {
@@ -57,22 +57,22 @@ export const refer = (data, callback) => {
                 } else {
                   callback(400, { error: `Cannot send referral email: ${err}` })
                 }
-              });
+              })
             } else {
               callback(400, { error: `Cannot generate token: ${refToken}` })
             }
-          });
+          })
         } else {
           callback(400, { error: 'No such user.' })
         }
-      });
+      })
     } else {
       callback(400, { error: 'Not all data is provided.' })
     }
   } else {
     callback(403, { error: 'Wrong token provided.' })
   }
-};
+}
 
 /**
   * @desc Referred user clicks his link
@@ -89,7 +89,7 @@ export const use = (data, callback) => {
       } else {
         callback(403, { error: 'No such referral token.' })
       }
-    });
+    })
   } else {
     callback(400, { error: 'Wrong data provided.' })
   }
@@ -101,8 +101,8 @@ export const use = (data, callback) => {
   * @return bool - success or failure with optional error object
 */
 export const register = (data, callback) => {
-  const token = typeof data.payload.token === 'string' && data.payload.token.length === 36 ? data.payload.token : false;
-  const phone = typeof data.payload.phone === 'string' && data.payload.phone.length >= 11 ? data.payload.phone : false;
+  const token = typeof data.payload.token === 'string' && data.payload.token.length === 36 ? data.payload.token : false
+  const phone = typeof data.payload.phone === 'string' && data.payload.phone.length >= 11 ? data.payload.phone : false
   if (token && phone) {
     dataLib.read('users', phone, (err, userData) => {
       if (!err && userData) {
@@ -123,7 +123,7 @@ export const register = (data, callback) => {
               callback(400, { error: 'Referred user already registered.' })
             }
           } else {
-            callback(400, { error: 'Cannot find referral token.' });
+            callback(400, { error: 'Cannot find referral token.' })
           }
         })
       } else {
