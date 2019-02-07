@@ -1,5 +1,9 @@
-import { dataLib, userObj, randomID, sendSMS, sendEmail } from '../../lib'
 import config from '../../config'
+import dataLib from '../../lib/data/functions'
+import userObj from '../../lib/data/userObj'
+import randomID from '../../lib/security/randomID'
+import sendEmail from '../../lib/email'
+import sendSMS from '../../lib/phone'
 
 const sendEmailReset = (email, phone, callback) => {
   randomID(32, (code) => {

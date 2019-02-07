@@ -1,5 +1,11 @@
-import { dataLib, randomID, hash, sendEmail, log, error, finalizeRequest } from '../../lib'
+import log from '../../lib/debug/log'
+import error from '../../lib/debug/error'
 import config from '../../config'
+import dataLib from '../../lib/data/functions'
+import finalizeRequest from '../../lib/data/finalizeRequest'
+import hash from '../../lib/security/hash'
+import randomID from '../../lib/security/randomID'
+import sendEmail from '../../lib/email'
 
 const token = (data) => {
   if (typeof data.payload === 'object') {
@@ -33,13 +39,19 @@ export default (data, callback) => {
                 if (tokenData.type === 'reset') {
                   randomID(16, (password) => {
                     if (password) {
-                      userData.password = hash(password)
-                      userData.updatedAt = Date.now()
-                      sendNewPassword(userData.email, password, (err) => {
-                        if (!err) {
-                          log('Email sent', 'FgGreen')
+                      hash(password, (hashed) => {
+                        if (!hashed) {
+                          callback(500, { error: 'Cannot hash password.' })
                         } else {
-                          error(err)
+                          userData.password = hashed
+                          userData.updatedAt = Date.now()
+                          sendNewPassword(userData.email, password, (err) => {
+                            if (!err) {
+                              log('Email sent', 'FgGreen')
+                            } else {
+                              error(err)
+                            }
+                          })
                         }
                       })
                     } else {

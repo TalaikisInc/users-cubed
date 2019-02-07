@@ -8,13 +8,14 @@ export default {
   USER: {
     CREATE: 'USER_CREATE',
     EDIT: 'USER_EDIT',
-    DESTROY: 'USER_DESTROY'
+    DESTROY: 'USER_DESTROY',
+    GET: 'USER_GET'
   },
   TOKEN: {
     CREATE: 'TOKEN_CREATE',
     EXTEND: 'TOKEN_EXTEND',
-    DESTROY: 'TOKEN_DESTROY'
-    }
+    DESTROY: 'TOKEN_DESTROY',
+    GET: 'TOKEN_GET'
   },
   REFER: {
     REFER: 'REFER_REFER',

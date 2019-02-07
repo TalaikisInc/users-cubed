@@ -1,5 +1,9 @@
-import { dataLib, uuidv4, tokenHeader, userObj, sendEmail, finalizeRequest } from '../../lib'
-import { config } from '../../config'
+import { uuidv4, tokenHeader } from '../../lib'
+import config from '../../config'
+import dataLib from '../../lib/data/functions'
+import userObj from '../../lib/data/userObj'
+import finalizeRequest from '../../lib/data/finalizeRequest'
+import sendEmail from '../../lib/email'
 
 const generateToken = (phone, callback) => {
   const token = uuidv4()

@@ -1,5 +1,9 @@
-import { dataLib, hash, randomID, userObj, finalizeRequest } from '../../lib'
+import { randomID } from '../../lib'
 import config from '../../config'
+import dataLib from '../../lib/data/functions'
+import userObj from '../../lib/data/userObj'
+import hash from '../../lib/security/hash'
+import finalizeRequest from '../../lib/data/finalizeRequest'
 
 const valid = (data) => {
   return typeof data.payload.tokenId === 'string' && data.payload.tokenId.trim().length === 36 ? data.payload.tokenId.trim() : false
@@ -7,7 +11,7 @@ const valid = (data) => {
 
 export const get = (data, callback) => {
   if (valid(data)) {
-    dataLib.read('tokens', id, (err, data) => {
+    dataLib.read('tokens', data.payload.tokenId, (err, data) => {
       if (!err && data) {
         callback(200, data)
       } else {
@@ -58,7 +62,7 @@ export const create = (data, callback) => {
 
 export const extend = (data, callback) => {
   const id = valid(data)
-  if (id {
+  if (id) {
     dataLib.read('tokens', id, (err, data) => {
       if (!err && data) {
         if (data.expiry > Date.now()) {

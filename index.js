@@ -1,4 +1,5 @@
-import { server, workers } from './lib'
+import workers from './lib/workers'
+import server from './lib/server'
 
 const app = {}
 

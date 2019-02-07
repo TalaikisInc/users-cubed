@@ -1,14 +1,24 @@
-import { dataLib, hash, joinDelete, userObj, finalizeRequest, sendSMS, randomID, validPhone,
-  sendEmail, error, auth, log } from '../../lib'
-import config from '../../config'
+import { validate } from 'isemail'
 
-const sendEmailConfirmation = (email, phone, callback) => {
+import { joinDelete, auth } from '../../lib'
+import finalizeRequest from '../../lib/data/finalizeRequest'
+import dataLib from '../../lib/data/functions'
+import userObj from '../../lib/data/userObj'
+import hash from '../../lib/security/hash'
+import config from '../../config'
+import randomID from '../../lib/security/randomID'
+import sendEmail from '../../lib/email'
+import sendSMS from '../../lib/phone'
+import log from '../../lib/debug/log'
+import error from '../../lib/debug/error'
+
+const sendEmailConfirmation = (email, callback) => {
   randomID(32, (code) => {
     if (code) {
       const subject = 'Please confirm your account'
       const msg = `Your code for ${config.company} account: <a href="${config.baseUrl}?token=${code}">${code}</a>`
       const obj = {
-        phone,
+        email,
         token: code,
         type: config.mainConfirm,
         expiry: Date.now() + 1000 * 60 * 60
@@ -33,12 +43,12 @@ const sendEmailConfirmation = (email, phone, callback) => {
   })
 }
 
-const sendPhoneConfirmation = (phone, callback) => {
+const sendPhoneConfirmation = (phone, email, callback) => {
   randomID(6, (code) => {
     if (code) {
       const msg = `Your code for ${config.company} account: ${code}`
       const obj = {
-        phone,
+        email,
         token: code,
         expiry: Date.now() + 1000 * 60 * 60
       }
@@ -62,14 +72,11 @@ const sendPhoneConfirmation = (phone, callback) => {
   })
 }
 
-const _users = {}
-
-_users.get = (data, callback) => {
-  const phone = validPhone(data)
-  if (phone) {
+export const get = (data, callback) => {
+  if (validate(data.payload.email)) {
     auth(data, (tokenData) => {
       if (tokenData) {
-        dataLib.read('users', phone, (err, data) => {
+        dataLib.read('users', email, (err, data) => {
           if (!err && data) {
             delete data.password
             callback(200, data)
@@ -87,66 +94,67 @@ _users.get = (data, callback) => {
 }
 
 const createUser = (obj, callback) => {
-  const hashedPassword = hash(obj.password)
-  if (hashedPassword) {
-    const now = Date.now()
-    const newObj = {
-      firstName: obj.firstName,
-      lastName: obj.lastName,
-      phone: obj.phone,
-      email: obj.email,
-      tosAgreement: obj.tosAgreement,
-      password: hashedPassword,
-      referred: [],
-      address: obj.address,
-      city: obj.city,
-      country: obj.country,
-      confirmed: {
-        email: false,
-        phone: false
-      },
-      registeredAt: now,
-      updatedAt: now,
-      role: 'user'
-    }
-
-    dataLib.create('users', obj.phone, newObj, (err) => {
-      if (!err) {
-        if (config.mainConfirm === 'email') {
-          sendEmailConfirmation(obj.email, obj.phone, (err) => {
-            if (!err.error) {
-              callback(false)
-            } else {
-              callback(`Could not send email: ${err.error}`)
-            }
-          })
-        }
-
-        if (config.mainConfirm === 'phone') {
-          sendPhoneConfirmation(obj.phone, (err) => {
-            if (!err.error) {
-              callback(false)
-            } else {
-              callback(`Could not send SMS: ${err.error}`)
-            }
-          })
-        }
-      } else {
-        callback('Could not create user.')
+  hash(obj.password, (hashedPassword) => {
+    if (hashedPassword) {
+      const now = Date.now()
+      const newObj = {
+        firstName: obj.firstName,
+        lastName: obj.lastName,
+        phone: obj.phone,
+        email: obj.email,
+        tosAgreement: obj.tosAgreement,
+        password: hashedPassword,
+        referred: [],
+        address: obj.address,
+        city: obj.city,
+        country: obj.country,
+        confirmed: {
+          email: false,
+          phone: false
+        },
+        registeredAt: now,
+        updatedAt: now,
+        role: 'user'
       }
-    })
-  } else {
-    callback('Could not hash password.')
-  }
+  
+      dataLib.create('users', obj.email, newObj, (err) => {
+        if (!err) {
+          if (config.mainConfirm === 'email') {
+            sendEmailConfirmation(obj.email, (err) => {
+              if (!err.error) {
+                callback(false)
+              } else {
+                callback(`Could not send email: ${err.error}`)
+              }
+            })
+          }
+
+          if (config.mainConfirm === 'phone') {
+            sendPhoneConfirmation(obj.phone, obj.email, (err) => {
+              if (!err.error) {
+                callback(false)
+              } else {
+                callback(`Could not send SMS: ${err.error}`)
+              }
+            })
+          }
+        } else {
+          callback('Could not create user.')
+        }
+      })
+    } else {
+      callback('Could not hash password.')
+    }
+  })
 }
 
 export const create = (data, callback) => {
-  const uo = userObj(data)
+  const u = userObj(data)
 
-  if (uo.firstName && uo.lastName && uo.phone && uo.email && uo.password && uo.tosAgreement) {
-    dataLib.read('users', uo.phone, (err, _) => {
+  if (u.firstName && u.lastName && u.email && u.password && u.tosAgreement) {
+    dataLib.read('users', u.email, (err, _) => {
       if (err) {
-        createUser(uo, (err) => {
+        createUser(u, (err) => {
           if (!err) {
             callback(200)
           } else {
@@ -163,38 +171,38 @@ export const create = (data, callback) => {
 }
 
 export const edit = (data, callback) => {
-  const uo = userObj(data)
+  const u = userObj(data)
 
-  if (uo.phone) {
-    if (uo.firstName || uo.lastName || uo.password || uo.email) {
+  if (u.email) {
+    if (u.firstName || u.lastName || u.password || u.email) {
       auth(data, (tokenData) => {
         if (tokenData) {
-          dataLib.read('users', uo.phone, (err, data) => {
-            if (!err && data) {
-              if (data.confirmed.email || data.confirmed.phone) {
-                if (uo.firstName !== data.firstName) {
-                  data.firstName = uo.firstName
+          dataLib.read('users', u.email, (err, userData) => {
+            if (!err && userData) {
+              if (userData.confirmed.email || userData.confirmed.phone) {
+                if (u.firstName !== userData.firstName) {
+                  userData.firstName = u.firstName
                 }
 
-                if (uo.address !== data.address) {
-                  data.address = uo.address
+                if (u.address !== userData.address) {
+                  userData.address = u.address
                 }
 
-                if (uo.city !== data.city) {
-                  data.city = uo.city
+                if (u.city !== userData.city) {
+                  userData.city = u.city
                 }
 
-                if (uo.country !== data.country) {
-                  data.country = uo.country
+                if (u.country !== userData.country) {
+                  userData.country = u.country
                 }
 
-                if (uo.lastName !== data.lastName) {
-                  data.lastName = uo.lastName
+                if (u.lastName !== userData.lastName) {
+                  userData.lastName = u.lastName
                 }
 
-                if (uo.email !== data.email) {
-                  data.email = uo.email
-                  users.sendEmailConfirmation(uo.email, uo.phone, (err) => {
+                if (u.email !== userData.email) {
+                  data.email = u.email
+                  sendEmailConfirmation(u.email, (err) => {
                     if (!err) {
                       log('Email sent.', 'FgGreen')
                     } else {
@@ -203,13 +211,20 @@ export const edit = (data, callback) => {
                   })
                 }
 
-                if (uo.password) {
-                  data.password = hash(uo.password)
+                if (u.password) {
+                  hash(u.password, (hashed) => {
+                    if (hashed) {
+                      userData.password = hashed
+                      userData.updatedAt = Date.now()
+                      finalizeRequest('users', u.email, 'update', callback, data)
+                    } else {
+                      callback(500, { error: 'Unable to hash password' })
+                    }
+                  })
+                } else {
+                  userData.updatedAt = Date.now()
+                  finalizeRequest('users', u.email, 'update', callback, data)
                 }
-
-                data.updatedAt = Date.now()
-
-                finalizeRequest('users', uo.phone, 'update', callback, data)
               } else {
                 callback(400, { error: 'Email or phone should be confirmed.' })
               }
@@ -230,34 +245,23 @@ export const edit = (data, callback) => {
 }
 
 export const destroy = (data, callback) => {
-  const phone = validPhone(data)
-  if (phone) {
+  if (validate(data.payload.email)) {
     auth(data, (tokenData) => {
       if (tokenData) {
-        dataLib.read('users', phone, (err, userData) => {
+        dataLib.read('users', data.payload.email, (err, userData) => {
           if (!err && userData) {
-            const urls = typeof userData.urls === 'object' && Array.isArray(userData.urls) ? userData.urls : []
             const refs = typeof userData.referred === 'object' && Array.isArray(userData.referred) ? userData.referred : []
-            const orders = typeof userData.orders === 'object' && Array.isArray(userData.orders) ? userData.orders : []
+            // delete any associated tables
+            // const orders = typeof userData.orders === 'object' && Array.isArray(userData.orders) ? userData.orders : []
 
-            dataLib.delete('users', phone, (err) => {
+            dataLib.delete('users', data.payload.email, (err) => {
               if (!err) {
-                joinDelete('urls', urls, (err) => {
+                joinDelete('refers', refs, (err) => {
                   if (err) {
                     error(err)
+                  } else {
+                    callback(200)
                   }
-                  joinDelete('refers', refs, (err) => {
-                    if (err) {
-                      error(err)
-                    }
-                    joinDelete('orders', orders, (err) => {
-                      if (err) {
-                        error(err)
-                      } else {
-                        callback(200)
-                      }
-                    })
-                  })
                 })
               } else {
                 callback(500, { error: 'Could not delete user.' })
