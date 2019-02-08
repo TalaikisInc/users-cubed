@@ -76,10 +76,10 @@ export const get = (data, callback) => {
   if (validate(data.payload.email)) {
     auth(data, (tokenData) => {
       if (tokenData) {
-        dataLib.read('users', email, (err, data) => {
-          if (!err && data) {
-            delete data.password
-            callback(200, data)
+        dataLib.read('users', data.payload.email, (err, userData) => {
+          if (!err && userData) {
+            delete userData.password
+            callback(200, userData)
           } else {
             callback(404, { error: 'No such user.' })
           }

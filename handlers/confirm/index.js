@@ -34,7 +34,7 @@ export default (data, callback) => {
       if (!err && tokenData) {
         if (tokenData.expiry > Date.now()) {
           if (tokenData.token === id) {
-            dataLib.read('users', tokenData.phone, (err, userData) => {
+            dataLib.read('users', tokenData.email, (err, userData) => {
               if (!err && userData) {
                 if (tokenData.type === 'reset') {
                   randomID(16, (password) => {
@@ -48,6 +48,7 @@ export default (data, callback) => {
                           sendNewPassword(userData.email, password, (err) => {
                             if (!err) {
                               log('Email sent', 'FgGreen')
+                              finalizeRequest('users', tokenData.email, 'update', callback, userData)
                             } else {
                               error(err)
                             }
@@ -60,9 +61,8 @@ export default (data, callback) => {
                   })
                 } else if (tokenData.type === 'email' || tokenData.type === 'phone') {
                   userData.confirmed[tokenData.type] = true
+                  finalizeRequest('users', tokenData.email, 'update', callback, userData)
                 }
-
-                finalizeRequest('users', tokenData.phone, 'update', callback, userData)
               } else {
                 callback(400, { error: 'No such user.' })
               }

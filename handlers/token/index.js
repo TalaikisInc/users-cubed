@@ -28,26 +28,30 @@ export const create = (data, callback) => {
 
   if ((u.email && u.password) || (u.phone && u.password)) {
     dataLib.read('users', u.email, (err, userData) => {
-      if (!err) {
+      console.log(userData)
+      console.log(typeof userData)
+      if (!err && userData) {s
         if (userData.confirmed.email || userData.confirmed.phone) {
-          if (hash(u.password) === userData.password) {
-            randomID(32, (tokenId) => {
-              if (tokenId) {
-                const expiry = Date.now() + 1000 * config.tokenExpiry
-                const tokenObj = {
-                  expiry,
-                  tokenId,
-                  role: userData.role,
-                  phone: u.phone
+          hash(u.password, (hashed) => {
+            if (userData.password === hashed) {
+              randomID(32, (tokenId) => {
+                if (tokenId) {
+                  const expiry = Date.now() + 1000 * config.tokenExpiry
+                  const tokenObj = {
+                    expiry,
+                    tokenId,
+                    role: userData.role,
+                    email: u.email
+                  }
+                  finalizeRequest('tokens', tokenId, 'create', callback, tokenObj)
+                } else {
+                  callback(400, { error: 'Cannot get unique ID.' })
                 }
-                finalizeRequest('tokens', tokenId, 'create', callback, tokenObj)
-              } else {
-                callback(400, { error: 'Cannot get unique ID.' })
-              }
-            })
-          } else {
-            callback(401, { error: 'Invalid password.' })
-          }
+              })
+            } else {
+              callback(401, { error: 'Invalid password.' })
+            }
+          })
         } else {
           callback(400, { error: 'User\'s account is not confirmed.' })
         }

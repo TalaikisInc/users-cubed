@@ -9,7 +9,7 @@ export default {
   [ACTIONS.TOKEN.EDIT]: require('./token').edit,
   [ACTIONS.TOKEN.DESTROY]: require('./token').destroy,
   [ACTIONS.TOKEN.GET]: require('./token').get,
-  [ACTIONS.CONFIRM.SEND]: require('./confirm').default,
+  [ACTIONS.CONFIRM]: require('./confirm').default,
   [ACTIONS.REFER.REFER]: require('./refer').refer,
   [ACTIONS.REFER.USE]: require('./refer').use,
   [ACTIONS.REFER.REGISTER]: require('./refer').register,

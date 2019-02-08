@@ -30,7 +30,7 @@ After readd:
   },
 ```
 
-### Main system
+## TODO
 
 * Unconfirmed (secondary) method confirm path
 * Phone/ email change - should also change all joined data points
@@ -53,6 +53,14 @@ npm run start
 ## Routes
 
 There is only one '/' route that accepts only POST requests with defined actions. List of actions is listed on Postam collection.
+
+## Database
+
+As default it uses simple json store, dataLLib can be easily configured for any type of database.
+
+## Deployment
+
+Use slave_build.sh and slave_start.sh, data will be mounted on /opt/.data
 
 ## Licence
 

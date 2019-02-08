@@ -1,7 +1,5 @@
 export default {
-  CONFIRM: {
-    SEND: 'CONFIRM_SEND'
-  },
+  CONFIRM: 'CONFIRM',
   RESET: {
     CREATE: 'RESET_CREATE'
   },
