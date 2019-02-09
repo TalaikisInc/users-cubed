@@ -47,7 +47,6 @@ export default (data, callback) => {
                           userData.updatedAt = Date.now()
                           sendNewPassword(userData.email, password, (err) => {
                             if (!err) {
-                              log('Email sent', 'FgGreen')
                               finalizeRequest('users', tokenData.email, 'update', callback, userData)
                             } else {
                               error(err)

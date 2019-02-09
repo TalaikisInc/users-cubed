@@ -5,13 +5,13 @@ import randomID from '../../lib/security/randomID'
 import sendEmail from '../../lib/email'
 import sendSMS from '../../lib/phone'
 
-const sendEmailReset = (email, phone, callback) => {
+const sendEmailReset = (email, callback) => {
   randomID(32, (code) => {
     if (code) {
       const subject = 'Please confirm your password reset'
       const msg = `Click here to confirm password reset: <a href="${config.baseUrl}?token=${code}">${code}</a>`
       const obj = {
-        phone,
+        email,
         type: 'reset',
         token: code,
         expiry: Date.now() + 1000 * 60 * 60
@@ -36,12 +36,12 @@ const sendEmailReset = (email, phone, callback) => {
   })
 }
 
-const sendPhoneConfirmation = (phone, callback) => {
+const sendPhoneConfirmation = (phone, email, callback) => {
   randomID(6, (code) => {
     if (code) {
       const msg = `Your code for ${config.company} password reset: ${code}`
       const obj = {
-        phone,
+        email,
         type: 'reset',
         token: code,
         expiry: Date.now() + 1000 * 60 * 60
@@ -68,7 +68,7 @@ const sendPhoneConfirmation = (phone, callback) => {
 
 const sendReset = (email, phone, callback) => {
   if (config.mainConfirm === 'email') {
-    sendEmailReset(email, phone, (err) => {
+    sendEmailReset(email, (err) => {
       if (!err) {
         callback(false)
       } else {
@@ -76,7 +76,7 @@ const sendReset = (email, phone, callback) => {
       }
     })
   } else if (config.mainConfirm === 'phone') {
-    sendPhoneConfirmation(phone, (err) => {
+    sendPhoneConfirmation(phone, email, (err) => {
       if (!err) {
         callback(false)
       } else {
@@ -87,11 +87,11 @@ const sendReset = (email, phone, callback) => {
 }
 
 export default (data, callback) => {
-  const obj = userObj(data)
-  if (obj.phone) {
-    dataLib.read('users', obj.phone, (err, userData) => {
+  const u = userObj(data)
+  if (u.email) {
+    dataLib.read('users', u.email, (err, userData) => {
       if (!err && userData) {
-        sendReset(userData.email, userData.phone, (err) => {
+        sendReset(u.email, userData.phone, (err) => {
           if (!err.error) {
             callback(200)
           } else {

@@ -1,6 +1,6 @@
 import { validate } from 'isemail'
 
-import { joinDelete, auth } from '../../lib'
+import joinDelete from '../../lib/data/joinDelete'
 import finalizeRequest from '../../lib/data/finalizeRequest'
 import dataLib from '../../lib/data/functions'
 import userObj from '../../lib/data/userObj'
@@ -11,6 +11,7 @@ import sendEmail from '../../lib/email'
 import sendSMS from '../../lib/phone'
 import log from '../../lib/debug/log'
 import error from '../../lib/debug/error'
+import auth from '../../lib/security/auth'
 
 const sendEmailConfirmation = (email, callback) => {
   randomID(32, (code) => {
@@ -73,24 +74,20 @@ const sendPhoneConfirmation = (phone, email, callback) => {
 }
 
 export const get = (data, callback) => {
-  if (validate(data.payload.email)) {
-    auth(data, (tokenData) => {
-      if (tokenData) {
-        dataLib.read('users', data.payload.email, (err, userData) => {
-          if (!err && userData) {
-            delete userData.password
-            callback(200, userData)
-          } else {
-            callback(404, { error: 'No such user.' })
-          }
-        })
-      } else {
-        callback(403, { error: 'Unauthorized.' })
-      }
-    })
-  } else {
-    callback(400, { error: 'Missing required field.' })
-  }
+  auth(data, (tokenData) => {
+    if (tokenData) {
+      dataLib.read('users', data.payload.email, (err, userData) => {
+        if (!err && userData) {
+          delete userData.password
+          callback(200, userData)
+        } else {
+          callback(404, { error: 'No such user.' })
+        }
+      })
+    } else {
+      callback(403, { error: 'Unauthorized.' })
+    }
+  })
 }
 
 const createUser = (obj, callback) => {
@@ -245,37 +242,33 @@ export const edit = (data, callback) => {
 }
 
 export const destroy = (data, callback) => {
-  if (validate(data.payload.email)) {
-    auth(data, (tokenData) => {
-      if (tokenData) {
-        dataLib.read('users', data.payload.email, (err, userData) => {
-          if (!err && userData) {
-            const refs = typeof userData.referred === 'object' && Array.isArray(userData.referred) ? userData.referred : []
-            // delete any associated tables
-            // const orders = typeof userData.orders === 'object' && Array.isArray(userData.orders) ? userData.orders : []
-
-            dataLib.delete('users', data.payload.email, (err) => {
-              if (!err) {
-                joinDelete('refers', refs, (err) => {
-                  if (err) {
-                    error(err)
-                  } else {
-                    callback(200)
-                  }
-                })
-              } else {
-                callback(500, { error: 'Could not delete user.' })
-              }
-            })
-          } else {
-            callback(400, { error: 'No such user.' })
-          }
-        })
-      } else {
-        callback(403, { error: 'Unauthorized.' })
-      }
-    })
-  } else {
-    callback(400, { error: 'Missing required field.' })
-  }
+  auth(data, (tokenData) => {
+    console.log(tokenData)
+    if (tokenData) {
+      dataLib.read('users', data.payload.email, (err, userData) => {
+        if (!err && userData) {
+          const refs = typeof userData.referred === 'object' && Array.isArray(userData.referred) ? userData.referred : []
+          // delete any associated tables
+          // const orders = typeof userData.orders === 'object' && Array.isArray(userData.orders) ? userData.orders : []
+          dataLib.delete('users', data.payload.email, (err) => {
+            if (!err) {
+              joinDelete('refers', refs, (err) => {
+                if (err) {
+                  error(err)
+                } else {
+                  callback(200)
+                }
+              })
+            } else {
+              callback(500, { error: 'Could not delete user.' })
+            }
+          })
+        } else {
+          callback(400, { error: 'No such user.' })
+        }
+      })
+    } else {
+      callback(403, { error: 'Unauthorized.' })
+    }
+  })
 }

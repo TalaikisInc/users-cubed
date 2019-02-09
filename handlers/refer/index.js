@@ -1,15 +1,18 @@
-import { uuidv4, tokenHeader } from '../../lib'
+import { validate } from 'isemail'
+
+import tokenHeader from '../../lib/data/tokenHeader'
 import config from '../../config'
 import dataLib from '../../lib/data/functions'
 import userObj from '../../lib/data/userObj'
 import finalizeRequest from '../../lib/data/finalizeRequest'
 import sendEmail from '../../lib/email'
+import uuidv4 from '../../lib/security/uuidv4'
 
-const generateToken = (phone, callback) => {
+const generateToken = (email, callback) => {
   const token = uuidv4()
   const obj = {
     id: token,
-    referral: phone,
+    referral: email,
     used: false,
     finalized: false
   }
@@ -38,18 +41,18 @@ const sendReferEmail = (email, token, referringUser, callback) => {
 
 /**
   * @desc Referring user sends email to friend
-  * @param object data - { headers: ( token: 'Bearer ...' ), phone: ..., refEmail: ... }
+  * @param object data - { headers: ( token: 'Bearer ...' ), phone: ..., to: ... }
   * @return bool - success or failure with optional error object
 */
 export const refer = (data, callback) => {
   const authToken = tokenHeader(data)
   if (authToken) {
-    const uo = userObj(data)
-    const refEmail = typeof data.payload.refEmail === 'string' && data.payload.refEmail.indexOf('@') > -1 ? data.payload.refEmail.trim() : false
-    if (uo.phone && refEmail) {
-      dataLib.read('users', uo.phone, (err, userData) => {
+    const u = userObj(data)
+    const refEmail = typeof data.payload.to === 'string' && data.payload.to.indexOf('@') > -1 ? data.payload.to.trim() : false
+    if (u.email && refEmail) {
+      dataLib.read('users', u.email, (err, userData) => {
         if (!err && data) {
-          generateToken(uo.phone, (err, refToken) => {
+          generateToken(u.email, (err, refToken) => {
             if (!err) {
               userData.referred.push(refToken)
               userData.updatedAt = Date.now()
@@ -86,10 +89,10 @@ export const refer = (data, callback) => {
 export const use = (data, callback) => {
   const token = typeof data.payload.token === 'string' && data.payload.token.length === 36 ? data.payload.token : false
   if (token) {
-    dataLib.read('refers', token, (err, data) => {
-      if (!err && data) {
-        data.used = true
-        finalizeRequest('refers', token, 'update', callback, data)
+    dataLib.read('refers', token, (err, refData) => {
+      if (!err && refData) {
+        refData.used = true
+        finalizeRequest('refers', token, 'update', callback, refData)
       } else {
         callback(403, { error: 'No such referral token.' })
       }
@@ -106,16 +109,16 @@ export const use = (data, callback) => {
 */
 export const register = (data, callback) => {
   const token = typeof data.payload.token === 'string' && data.payload.token.length === 36 ? data.payload.token : false
-  const phone = typeof data.payload.phone === 'string' && data.payload.phone.length >= 11 ? data.payload.phone : false
-  if (token && phone) {
-    dataLib.read('users', phone, (err, userData) => {
+  const email = typeof data.payload.from === 'string' && validate(data.payload.from) ? data.payload.from : false
+  if (token && email) {
+    dataLib.read('users', email, (err, userData) => {
       if (!err && userData) {
         dataLib.read('refers', token, (err, tokenData) => {
           if (!err && tokenData) {
             if (!userData.referred.includes(token)) {
               userData.referred.push(token)
               userData.updatedAt = Date.now()
-              dataLib.update('users', phone, userData, (err) => {
+              dataLib.update('users', email, userData, (err) => {
                 if (!err) {
                   tokenData.finalized = true
                   finalizeRequest('refers', token, 'update', callback, tokenData)

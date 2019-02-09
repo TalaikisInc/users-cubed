@@ -5,9 +5,9 @@ This is user management service API, currently storing data only on hosts' disk.
 ## Features
 
 * Usrr registration, login, edit, destroy
-* Same CRUDs for tokens
+* Same CRUD for tokens
 * Minimal referral system
-* Account confirmstions
+* Account confirmations
 * Password reset
 
 ## NOTE!
@@ -32,12 +32,13 @@ After readd:
 
 ## TODO
 
-* Unconfirmed (secondary) method confirm path
+* Unconfirmed (secondary) method confirm
 * Phone/ email change - should also change all joined data points
 * MOve everything under POST and action pattern
 * Ability to easily change first confirm method (finalize remaining)
 * More logs
 * Move into promises or aync/await
+* Data caching
 
 ## Run
 

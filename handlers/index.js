@@ -6,7 +6,7 @@ export default {
   [ACTIONS.USER.DESTROY]: require('./users').destroy,
   [ACTIONS.USER.GET]: require('./users').get,
   [ACTIONS.TOKEN.CREATE]: require('./token').create,
-  [ACTIONS.TOKEN.EDIT]: require('./token').edit,
+  [ACTIONS.TOKEN.EXTEND]: require('./token').extend,
   [ACTIONS.TOKEN.DESTROY]: require('./token').destroy,
   [ACTIONS.TOKEN.GET]: require('./token').get,
   [ACTIONS.CONFIRM]: require('./confirm').default,
