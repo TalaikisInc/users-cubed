@@ -32,13 +32,13 @@ After readd:
 
 ## TODO
 
-* Unconfirmed (secondary) method confirm
-* Phone/ email change - should also change all joined data points
-* MOve everything under POST and action pattern
-* Ability to easily change first confirm method (finalize remaining)
+
+* Tests
+* Unconfirmed (secondary) method confirm?
 * More logs
-* Move into promises or aync/await
-* Data caching
+* Move into async/await
+* Data caching?
+* Security improvements
 
 ## Run
 
