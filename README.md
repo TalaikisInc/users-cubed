@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://talaikis.com/">
+    <img alt="Talaikis Ltd." src="https://github.com/TalaikisInc/talaikis.com_react/blob/master/media/logo.png" width="228">
+  </a>
+</p>
+
 # Users Cubed
 
 This is user management service API, currently storing data only on hosts' disk.
@@ -12,26 +18,9 @@ This is user management service API, currently storing data only on hosts' disk.
 
 ## NOTE!
 
-Improvement work in progress, current will break.
-
-After readd:
-
-```
-"husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.(js|jsx|mjs)": [
-      "npm run test"
-    ]
-  },
-```
+Successor is [User Management System API on S3](https://github.com/TalaikisInc/users-cubed-s3)
 
 ## TODO
-
 
 * Tests
 * Unconfirmed (secondary) method confirm?
